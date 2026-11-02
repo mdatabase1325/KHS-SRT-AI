@@ -1,0 +1,26 @@
+{
+  "name": "khs-srt-ai",
+  "version": "1.0.0",
+  "description": "KHS SRT.Ai - AI Neural Text-to-Speech, Subtitle Dubbing & Multi-Speaker Studio",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "khs-srt-ai",
+    "text-to-speech",
+    "tts",
+    "srt-dubbing",
+    "edge-tts",
+    "srt-to-speech",
+    "ai-voice"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "msedge-tts": "^2.1.1",
+    "ws": "^8.22.0"
+  }
+}
