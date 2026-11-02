@@ -1,11 +1,12 @@
 // KHS SRT.Ai Pro Application Logic
 // State Management
 const state = {
+  currentLang: localStorage.getItem('khs_lang') || 'km', // default to Khmer or saved preference
   activeTab: 'tts',
   voices: [],
   locales: [],
-  selectedLocale: 'en-US',
-  selectedVoice: 'en-US-JennyNeural',
+  selectedLocale: 'km-KH',
+  selectedVoice: 'km-KH-PisethNeural',
   speed: 1.0,
   pitch: 0,
   volume: 1.0,
@@ -25,13 +26,13 @@ const state = {
   },
   // Multi-Speaker Dialogue State
   speakers: [
-    { id: 'spk_1', name: 'Alex (Host)', voice: 'en-US-JennyNeural', color: 'indigo' },
-    { id: 'spk_2', name: 'Jordan (Guest)', voice: 'en-US-GuyNeural', color: 'pink' }
+    { id: 'spk_1', name: 'ពិសិដ្ឋ (Piseth - ពិធីករ)', voice: 'km-KH-PisethNeural', color: 'indigo' },
+    { id: 'spk_2', name: 'ស្រីមុំ (Sreymom - ភ្ញៀវ)', voice: 'km-KH-SreymomNeural', color: 'pink' }
   ],
   dialogueLines: [
-    { id: '1', speakerId: 'spk_1', text: 'Welcome back to the KHS SRT.Ai studio podcast! Today we are exploring the future of AI voices.' },
-    { id: '2', speakerId: 'spk_2', text: 'Thanks for having me, Alex! It is astonishing how lifelike and expressive neural voice models have become.' },
-    { id: '3', speakerId: 'spk_1', text: 'Absolutely. Content creators can now generate entire podcast episodes and audiobooks seamlessly.' }
+    { id: '1', speakerId: 'spk_1', text: 'សូមស្វាគមន៍មកកាន់ស្ទូឌីយោផតខាសរបស់ KHS SRT.Ai! ថ្ងៃនេះយើងនឹងពិភាក្សាអំពីបច្ចេកវិទ្យា AI សំឡេង។' },
+    { id: '2', speakerId: 'spk_2', text: 'ចាស សូមជម្រាបសួរពិសិដ្ឋ! ពិតជាអស្ចារ្យណាស់ដែលសំឡេង AI ឥឡូវនេះមានលក្ខណៈធម្មជាតិដូចមនុស្សពិតៗ។' },
+    { id: '3', speakerId: 'spk_1', text: 'ពិតមែនហើយ អ្នកបង្កើតមាតិកាអាចបង្កើតវីដេអូ និងអានសៀវភៅបានយ៉ាងរហ័សទាន់ចិត្ត។' }
   ],
   // Subtitle Studio State
   srtCues: [],
@@ -46,8 +47,108 @@ const state = {
   }
 };
 
-// Preset Scripts
+// Full Khmer & English Translation Dictionary
+const I18N = {
+  en: {
+    flag: '🇺🇸',
+    name: 'English',
+    tabTts: 'Text to Speech',
+    tabDialogue: 'Multi-Speaker Dialogue',
+    tabSrt: 'Subtitle (SRT/VTT)',
+    tabVoices: 'Voices',
+    tabHistory: 'History',
+    scriptTitle: 'Script / Text',
+    words: 'Words',
+    estDuration: 'Est. Duration',
+    voiceTuning: 'Voice & Tuning',
+    allVoices: 'All 322 Voices',
+    langRegion: 'Language & Region',
+    voiceActor: 'Voice Actor',
+    sampleBtn: 'Sample',
+    speedLabel: 'Speaking Speed',
+    pitchLabel: 'Voice Pitch',
+    volumeLabel: 'Volume',
+    generateVoiceover: 'Generate Voiceover',
+    synthesizing: 'Synthesizing Neural Speech...',
+    dictate: 'Dictate',
+    listening: 'Listening...',
+    srtHeader: 'Subtitle to Speech (SRT & VTT Synchronizer)',
+    srtSub: 'Upload .srt or .vtt subtitles to generate synchronized voiceovers matching timestamps.',
+    uploadSrt: '1. Upload .SRT or .VTT File',
+    uploadVideo: '2. (Optional) Attach Video (.mp4 / .webm)',
+    synthesizeAll: 'Synthesize All Lines',
+    downloadZip: 'Download All as ZIP',
+    downloadMaster: 'Download Master Audio',
+    syncPreview: 'Synchronized Video & Dubbing Preview',
+    playSync: 'Play Sync',
+    pauseSync: 'Pause Sync',
+    dialogueHeader: 'Multi-Speaker Dialogue Studio (Podcasts & Conversations)',
+    addSpeaker: 'Add Speaker',
+    addLine: 'Add Line',
+    generateConversation: 'Generate Full Conversation',
+    voiceDirHeader: 'AI Neural Voice Directory',
+    allGender: 'All',
+    female: 'Female',
+    male: 'Male',
+    starred: 'Starred',
+    historyHeader: 'Generation History & Offline Audio Archive',
+    clearAll: 'Clear All'
+  },
+  km: {
+    flag: '🇰🇭',
+    name: 'ភាសាខ្មែរ',
+    tabTts: 'បម្លែងអត្ថបទជាសំឡេង',
+    tabDialogue: 'សន្ទនាពហុតួអង្គ',
+    tabSrt: 'បញ្ចូលសំឡេងរង (SRT)',
+    tabVoices: 'បណ្ណាល័យសំឡេង',
+    tabHistory: 'ប្រវត្តិ',
+    scriptTitle: 'អត្ថបទ / ស្គ្រីប',
+    words: 'ចំនួនពាក្យ',
+    estDuration: 'រយៈពេលប្រហែល',
+    voiceTuning: 'ការកំណត់សំឡេង',
+    allVoices: 'សំឡេងទាំងអស់ ៣២២',
+    langRegion: 'ភាសា និងតំបន់',
+    voiceActor: 'សំឡេងអ្នកអាន',
+    sampleBtn: 'ស្តាប់គំរូ',
+    speedLabel: 'ល្បឿនអាន',
+    pitchLabel: 'កម្រិតសំឡេង',
+    volumeLabel: 'កម្រិតឮ',
+    generateVoiceover: 'បង្កើតសំឡេង AI',
+    synthesizing: 'កំពុងបង្កើតសំឡេង AI...',
+    dictate: 'និយាយ',
+    listening: 'កំពុងស្តាប់...',
+    srtHeader: 'បញ្ចូលសំឡេងរងទៅជាសំឡេងនិយាយ (SRT & VTT)',
+    srtSub: 'បញ្ចូលឯកសារ .srt ឬ .vtt ដើម្បីបង្កើតសំឡេងនិយាយស៊ីគ្នានឹងពេលវេលាវីដេអូ។',
+    uploadSrt: '១. បញ្ចូលឯកសារ .SRT ឬ .VTT',
+    uploadVideo: '២. (ជម្រើសបន្ថែម) ភ្ជាប់វីដេអូ (.mp4 / .webm)',
+    synthesizeAll: 'បង្កើតសំឡេងគ្រប់បន្ទាត់',
+    downloadZip: 'ទាញយកជា ZIP',
+    downloadMaster: 'ទាញយកសំឡេងពេញលេញ',
+    syncPreview: 'វីដេអូ និងការចាក់សំឡេងស្របគ្នា (Sync Preview)',
+    playSync: 'ចាក់វីដេអូ និងសំឡេង',
+    pauseSync: 'ផ្អាកវីដេអូ',
+    dialogueHeader: 'ស្ទូឌីយោសន្ទនាពហុតួអង្គ (ផតខាស និងការសន្ទនា)',
+    addSpeaker: 'បន្ថែមតួអង្គ',
+    addLine: 'បន្ថែមឃ្លា',
+    generateConversation: 'បង្កើតការសន្ទនាពេញលេញ',
+    voiceDirHeader: 'តារាងសំឡេង AI Neural ទាំងអស់',
+    allGender: 'ទាំងអស់',
+    female: 'ស្រី',
+    male: 'ប្រុស',
+    starred: 'បានផ្កាយទុក',
+    historyHeader: 'ប្រវត្តិនៃការបង្កើតសំឡេង',
+    clearAll: 'លុបទាំងអស់'
+  }
+};
+
+// Preset Scripts in English and Khmer
 const PRESETS = {
+  // Khmer Presets
+  km_news: `សូមស្វាគមន៍មកកាន់ការផ្សាយព័ត៌មានប្រចាំថ្ងៃ។ ថ្ងៃនេះយើងមានព័ត៌មានសំខាន់ៗជាច្រើនស្តីពីការអភិវឌ្ឍបច្ចេកវិទ្យាបញ្ញាសិប្បនិម្មិត AI និងការរីកចម្រើននៃសេដ្ឋកិច្ចឌីជីថលនៅក្នុងប្រទេសកម្ពុជា។ រដ្ឋាភិបាលបានដាក់ចេញនូវយុទ្ធសាស្ត្រថ្មីដើម្បីពង្រឹងសមត្ថភាពយុវជនក្នុងជំនាញបច្ចេកវិទ្យាទំនើប។`,
+  km_story: `កាលពីព្រេងនាយ នៅឯព្រៃជ្រៅដ៏ស្ងប់ស្ងាត់មួយ មានសត្វស្លាបតូចមួយរស់នៅដោយក្តីរីករាយ។ រៀងរាល់ព្រឹក វាតែងតែហោះហើរទៅកាន់កំពូលភ្នំខ្ពស់ ដើម្បីទស្សនាពន្លឺព្រះអាទិត្យរះដ៏ស្រស់ស្អាត និងច្រៀងបំពេរព្រៃឈើទាំងមូលដោយសំឡេងដ៏ពីរោះរណ្តំ។`,
+  km_explainer: `សួស្តីអ្នកទាំងអស់គ្នា! សូមស្វាគមន៍មកកាន់វីដេអូថ្មីរបស់យើង។ នៅក្នុងវីដេអូថ្ងៃនេះ ខ្ញុំនឹងបង្ហាញអ្នកទាំងអស់គ្នាអំពីវិធីសាស្រ្តងាយៗក្នុងការបង្កើតសំឡេង AI ដោយឥតគិតថ្លៃជាមួយ KHS SRT.Ai។ កុំភ្លេចចុច Like និង Subscribe ដើម្បីទទួលបានវីដេអូបច្ចេកវិទ្យាថ្មីៗជាច្រើនទៀត!`,
+  km_commercial: `ស្វែងរកភាពងាយស្រួល និងប្រសិទ្ធភាពខ្ពស់ជាមួយ KHS SRT.Ai! បម្លែងអត្ថបទទៅជាសំឡេងធម្មជាតិ និងបញ្ចូលសំឡេងរងលើវីដេអូបានរហ័សទាន់ចិត្ត។ សាកល្បងឥឡូវនេះដោយឥតគិតថ្លៃ ដើម្បីបង្កើនគុណភាពការងាររបស់អ្នក!`,
+  // English Presets
   youtube: `Welcome back to the channel! In today's video, we are diving deep into the future of Artificial Intelligence and how voice technology is transforming content creation. If you enjoy this video, make sure to hit that like button and subscribe for more weekly tech insights. Let's get right into it!`,
   commercial: `Introducing KHS SRT.Ai, the fastest and most realistic AI voice generator on the web. Convert your scripts, articles, and video subtitles into lifelike speech in over 70 languages. Try it free today and give your projects the voice they deserve.`,
   story: `Deep within the enchanted whispering forest, where the moon painted silver ripples upon the ancient lake, a little owl named Barnaby set out on his very first nighttime adventure. The stars twinkled warmly above, guiding his gentle wings through the quiet breeze.`,
@@ -157,15 +258,220 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupAudioEvents();
   setupCanvasWaveform();
   setupKeyboardShortcuts();
+  setupVideoDropzone();
   renderDialogueStudio();
   updateTextStats();
   updateHistoryBadge();
+  applyLanguage(state.currentLang);
 
   if (!ttsText.value) {
-    ttsText.value = PRESETS.youtube;
+    ttsText.value = state.currentLang === 'km' ? PRESETS.km_news : PRESETS.youtube;
     updateTextStats();
   }
 });
+
+// Language Switching & i18n
+function toggleLanguage() {
+  state.currentLang = state.currentLang === 'km' ? 'en' : 'km';
+  localStorage.setItem('khs_lang', state.currentLang);
+  applyLanguage(state.currentLang);
+  
+  // Also adjust default voice if switching
+  if (state.currentLang === 'km') {
+    quickSelectVoice('km-KH-PisethNeural');
+  } else {
+    quickSelectVoice('en-US-JennyNeural');
+  }
+
+  showToast(state.currentLang === 'km' ? 'បានប្តូរទៅជាភាសាខ្មែរ 🇰🇭' : 'Switched to English 🇺🇸', 'info');
+}
+
+function applyLanguage(lang) {
+  const t = I18N[lang] || I18N.km;
+  
+  // Header language button
+  const flagEl = document.getElementById('langFlagIcon');
+  const textEl = document.getElementById('langText');
+  if (flagEl) flagEl.textContent = t.flag;
+  if (textEl) textEl.textContent = t.name;
+
+  // Desktop navigation tab labels
+  const tabTts = document.querySelector('#tab-btn-tts span');
+  const tabDialogue = document.querySelector('#tab-btn-dialogue span');
+  const tabSrt = document.querySelector('#tab-btn-srt span');
+  const tabLibrary = document.querySelector('#tab-btn-library span');
+  const tabHistory = document.querySelector('#tab-btn-history span');
+  if (tabTts) tabTts.textContent = t.tabTts;
+  if (tabDialogue) tabDialogue.textContent = t.tabDialogue;
+  if (tabSrt) tabSrt.textContent = t.tabSrt;
+  if (tabLibrary) tabLibrary.textContent = t.tabVoices;
+  if (tabHistory) tabHistory.textContent = t.tabHistory;
+
+  // Mobile bottom tab labels
+  const mTabTts = document.querySelector('#tab-m-tts span');
+  const mTabDialogue = document.querySelector('#tab-m-dialogue span');
+  const mTabSrt = document.querySelector('#tab-m-srt span');
+  const mTabLibrary = document.querySelector('#tab-m-library span');
+  const mTabHistory = document.querySelector('#tab-m-history span');
+  if (mTabTts) mTabTts.textContent = lang === 'km' ? 'សំឡេង' : 'TTS';
+  if (mTabDialogue) mTabDialogue.textContent = lang === 'km' ? 'សន្ទនា' : 'Dialogue';
+  if (mTabSrt) mTabSrt.textContent = lang === 'km' ? 'អត្ថបទរង' : 'SRT/VTT';
+  if (mTabLibrary) mTabLibrary.textContent = lang === 'km' ? 'បណ្ណាល័យ' : 'Voices';
+  if (mTabHistory) mTabHistory.textContent = lang === 'km' ? 'ប្រវត្តិ' : 'History';
+
+  // TTS Studio labels
+  const generateBtnTextEl = document.getElementById('generateBtnText');
+  if (generateBtnTextEl && !state.isGenerating) generateBtnTextEl.textContent = t.generateVoiceover;
+
+  const sttLabel = document.getElementById('sttLabel');
+  if (sttLabel && !isRecognizing) sttLabel.textContent = t.dictate;
+
+  // Placeholders
+  if (ttsText && !ttsText.value) {
+    ttsText.placeholder = lang === 'km' ? 'វាយបញ្ចូល ឬចម្លងអត្ថបទរបស់អ្នកនៅទីនេះ ដើម្បីបម្លែងទៅជាសំឡេងនិយាយបែបធម្មជាតិ...' : 'Type or paste your text here to convert into natural speech...';
+  }
+
+  // Update voice library gender filters
+  const genderAll = document.querySelector('#gender-all span');
+  const genderFemale = document.querySelector('#gender-female span');
+  const genderMale = document.querySelector('#gender-male span');
+  if (genderAll) genderAll.textContent = t.allGender;
+  if (genderFemale) genderFemale.textContent = t.female;
+  if (genderMale) genderMale.textContent = t.male;
+}
+
+// Quick Select Voice by ID (e.g. km-KH-PisethNeural)
+function quickSelectVoice(voiceId) {
+  const voice = state.voices.find(v => v.shortName === voiceId || v.id === voiceId);
+  if (!voice) {
+    state.selectedVoice = voiceId;
+    return;
+  }
+
+  state.selectedLocale = voice.locale;
+  state.selectedVoice = voice.shortName;
+
+  if (localeSelect) {
+    localeSelect.value = voice.locale;
+    updateSelectedLocaleFlag();
+  }
+
+  populateVoiceDropdown();
+  if (voiceSelect) voiceSelect.value = voice.shortName;
+  updateSelectedVoiceCard();
+
+  showToast(`Selected voice: ${voice.name} (${voice.localeName})`, 'success');
+}
+
+// Speech-to-Text / Voice Dictation
+let speechRecognition = null;
+let isRecognizing = false;
+
+function toggleSpeechRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showToast('Your browser does not support Speech Recognition. Please try Google Chrome, Edge, or Safari.', 'warning');
+    return;
+  }
+
+  const sttBtn = document.getElementById('sttBtn');
+  const sttLabel = document.getElementById('sttLabel');
+
+  if (isRecognizing) {
+    if (speechRecognition) speechRecognition.stop();
+    stopSpeechRecognitionUI();
+    return;
+  }
+
+  try {
+    speechRecognition = new SpeechRecognition();
+    speechRecognition.continuous = true;
+    speechRecognition.interimResults = true;
+    speechRecognition.lang = state.currentLang === 'km' || state.selectedLocale === 'km-KH' ? 'km-KH' : (state.selectedLocale || 'en-US');
+
+    speechRecognition.onstart = () => {
+      isRecognizing = true;
+      if (sttBtn) sttBtn.classList.add('mic-recording');
+      if (sttLabel) sttLabel.textContent = state.currentLang === 'km' ? 'កំពុងស្តាប់...' : 'Listening...';
+      showToast(state.currentLang === 'km' ? '🎙️ កំពុងស្តាប់... សូមនិយាយចូលក្នុងមីក្រូហ្វូន' : '🎙️ Listening... Speak into microphone', 'info');
+    };
+
+    speechRecognition.onresult = (event) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        const cur = ttsText.value.trim();
+        ttsText.value = cur ? cur + ' ' + finalTranscript.trim() : finalTranscript.trim();
+        updateTextStats();
+      }
+    };
+
+    speechRecognition.onerror = (event) => {
+      console.warn('Speech recognition notice:', event.error);
+      if (event.error === 'not-allowed') {
+        showToast('Microphone access denied. Please grant microphone permission.', 'error');
+      }
+      stopSpeechRecognitionUI();
+    };
+
+    speechRecognition.onend = () => {
+      stopSpeechRecognitionUI();
+    };
+
+    speechRecognition.start();
+  } catch (err) {
+    console.error('Speech recognition error:', err);
+    stopSpeechRecognitionUI();
+    showToast(`Dictation error: ${err.message}`, 'error');
+  }
+}
+
+function stopSpeechRecognitionUI() {
+  isRecognizing = false;
+  const sttBtn = document.getElementById('sttBtn');
+  const sttLabel = document.getElementById('sttLabel');
+  if (sttBtn) sttBtn.classList.remove('mic-recording');
+  if (sttLabel) sttLabel.textContent = state.currentLang === 'km' ? 'និយាយ' : 'Dictate';
+}
+
+// PWA Install Handling
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const pwaBtn = document.getElementById('pwaInstallBtn');
+  if (pwaBtn) pwaBtn.classList.remove('hidden');
+});
+
+function installPwa() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        showToast('App installed successfully! 🚀', 'success');
+      }
+      deferredPrompt = null;
+      const pwaBtn = document.getElementById('pwaInstallBtn');
+      if (pwaBtn) pwaBtn.classList.add('hidden');
+    });
+  } else {
+    showToast('To install: on Chrome/Edge click ⠇ -> "Install App", on Safari tap Share -> "Add to Home Screen".', 'info');
+  }
+}
+
+// Service worker registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.warn('SW registration warning:', err);
+    });
+  });
+}
 
 // Load Favorites from LocalStorage
 function loadFavoritesFromStorage() {
@@ -461,9 +767,15 @@ function loadPresetScript(key) {
   if (PRESETS[key]) {
     ttsText.value = PRESETS[key];
     updateTextStats();
-    showToast(`Loaded ${key} sample script`, 'info');
+    if (key.startsWith('km_')) {
+      quickSelectVoice('km-KH-PisethNeural');
+      showToast('បានបញ្ចូលគំរូស្គ្រីបជាភាសាខ្មែរ 🇰🇭', 'success');
+    } else {
+      showToast(`Loaded ${key} sample script`, 'info');
+    }
   }
-  document.getElementById('presetSelect').value = '';
+  const sel = document.getElementById('presetSelect');
+  if (sel) sel.value = '';
 }
 
 function togglePauseMenu() {
@@ -1145,18 +1457,32 @@ function deleteDialogueLine(index) {
 }
 
 function loadSampleDialogue() {
-  state.speakers = [
-    { id: 'spk_1', name: 'Alex (Host)', voice: 'en-US-JennyNeural', color: 'indigo' },
-    { id: 'spk_2', name: 'Jordan (Guest)', voice: 'en-US-GuyNeural', color: 'pink' }
-  ];
-  state.dialogueLines = [
-    { id: '1', speakerId: 'spk_1', text: 'Welcome back everyone. Today we are joined by Jordan, an AI audio researcher.' },
-    { id: '2', speakerId: 'spk_2', text: 'Thank you Alex! It is wonderful to be here and showcase multi-voice speech synthesis.' },
-    { id: '3', speakerId: 'spk_1', text: 'Could you explain why having multiple voices in one script makes content so compelling?' },
-    { id: '4', speakerId: 'spk_2', text: 'Certainly. Conversational pacing and contrasting voice tones keep listeners engaged for long podcasts and stories.' }
-  ];
+  if (state.currentLang === 'km') {
+    state.speakers = [
+      { id: 'spk_1', name: 'ពិសិដ្ឋ (Piseth - ពិធីករ)', voice: 'km-KH-PisethNeural', color: 'indigo' },
+      { id: 'spk_2', name: 'ស្រីមុំ (Sreymom - ភ្ញៀវ)', voice: 'km-KH-SreymomNeural', color: 'pink' }
+    ];
+    state.dialogueLines = [
+      { id: '1', speakerId: 'spk_1', text: 'សូមជម្រាបសួរ និងស្វាគមន៍មកកាន់កម្មវិធីផតខាសរបស់ KHS SRT.Ai! ថ្ងៃនេះយើងមានកិត្តិយសណាស់ដែលបានជួបជាមួយស្រីមុំ។' },
+      { id: '2', speakerId: 'spk_2', text: 'ចាស សូមជម្រាបសួរពិសិដ្ឋ! នាងខ្ញុំពិតជារីករាយខ្លាំងណាស់ដែលបានចូលរួមចែករំលែកបទពិសោធន៍ក្នុងថ្ងៃនេះ។' },
+      { id: '3', speakerId: 'spk_1', text: 'តើស្រីមុំយល់ឃើញយ៉ាងណាដែរចំពោះការវិវត្តនៃបច្ចេកវិទ្យាបម្លែងអត្ថបទជាសំឡេងនៅកម្ពុជា?' },
+      { id: '4', speakerId: 'spk_2', text: 'បច្ចេកវិទ្យានេះមានសារៈសំខាន់ខ្លាំងណាស់ ក្នុងការជួយដល់ការបង្កើតមាតិកា ការអានសៀវភៅ និងការបញ្ចូលសំឡេងរងវីដេអូបានលឿននិងច្បាស់ល្អ។' }
+    ];
+    showToast('បានបញ្ចូលគំរូសន្ទនាជាភាសាខ្មែរ 🎙️', 'success');
+  } else {
+    state.speakers = [
+      { id: 'spk_1', name: 'Alex (Host)', voice: 'en-US-JennyNeural', color: 'indigo' },
+      { id: 'spk_2', name: 'Jordan (Guest)', voice: 'en-US-GuyNeural', color: 'pink' }
+    ];
+    state.dialogueLines = [
+      { id: '1', speakerId: 'spk_1', text: 'Welcome back everyone. Today we are joined by Jordan, an AI audio researcher.' },
+      { id: '2', speakerId: 'spk_2', text: 'Thank you Alex! It is wonderful to be here and showcase multi-voice speech synthesis.' },
+      { id: '3', speakerId: 'spk_1', text: 'Could you explain why having multiple voices in one script makes content so compelling?' },
+      { id: '4', speakerId: 'spk_2', text: 'Certainly. Conversational pacing and contrasting voice tones keep listeners engaged for long podcasts and stories.' }
+    ];
+    showToast('Loaded sample podcast dialogue', 'info');
+  }
   renderDialogueStudio();
-  showToast('Loaded sample podcast dialogue', 'info');
 }
 
 function clearDialogue() {
@@ -1259,10 +1585,10 @@ async function synthesizeDialogue() {
 }
 
 // ========================================================
-// TAB 3: SUBTITLE TO SPEECH (SRT & VTT)
+// TAB 3: SUBTITLE TO SPEECH (SRT & VTT) & VIDEO DUBBING
 // ========================================================
 
-const SAMPLE_SRT = `1
+const SAMPLE_SRT_EN = `1
 00:00:01,000 --> 00:00:04,200
 Welcome to KHS SRT.Ai, the most advanced AI voice generator.
 
@@ -1278,9 +1604,32 @@ Choose from over three hundred lifelike neural voices across seventy languages.
 00:00:14,000 --> 00:00:17,500
 Enjoy instant previews, customizable speed, and master audio export.`;
 
+const SAMPLE_SRT_KM = `1
+00:00:01,000 --> 00:00:04,200
+សូមស្វាគមន៍មកកាន់ KHS SRT.Ai កម្មវិធីបម្លែងសំឡេង AI ទំនើបបំផុត។
+
+2
+00:00:05,000 --> 00:00:08,800
+អ្នកអាចបម្លែងឯកសារអត្ថបទរង SRT ទៅជាសំឡេងនិយាយត្រូវគ្នានឹងវីដេអូ។
+
+3
+00:00:09,500 --> 00:00:13,200
+ជ្រើសរើសសំឡេង AI ធម្មជាតិជាង ៣០០ សំឡេង និងសំឡេងខ្មែរពិសិដ្ឋ និងស្រីមុំ។
+
+4
+00:00:14,000 --> 00:00:17,500
+រីករាយជាមួយការចាក់វីដេអូសាកល្បង និងទាញយកសំឡេងពេញលេញដោយឥតគិតថ្លៃ។`;
+
 function loadSampleSrt() {
-  parseAndLoadSrt(SAMPLE_SRT);
-  showToast('Loaded sample SRT subtitle', 'info');
+  if (state.currentLang === 'km') {
+    parseAndLoadSrt(SAMPLE_SRT_KM);
+    const srtVoice = document.getElementById('srtVoiceSelect');
+    if (srtVoice) srtVoice.value = 'km-KH-PisethNeural';
+    showToast('បានបញ្ចូលគំរូអត្ថបទរង SRT ជាភាសាខ្មែរ', 'info');
+  } else {
+    parseAndLoadSrt(SAMPLE_SRT_EN);
+    showToast('Loaded sample SRT subtitle', 'info');
+  }
 }
 
 function clearSrt() {
@@ -1309,29 +1658,182 @@ function handleSrtFileUpload(event) {
   reader.readAsText(file);
 }
 
-// Drag & drop handlers
-const srtDropzone = document.getElementById('srtDropzone');
-if (srtDropzone) {
-  srtDropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    srtDropzone.classList.add('border-indigo-500');
+// Subtitle & Video Drag-and-Drop Handlers
+function setupVideoDropzone() {
+  const srtDz = document.getElementById('srtDropzone');
+  if (srtDz) {
+    srtDz.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      srtDz.classList.add('border-indigo-500');
+    });
+    srtDz.addEventListener('dragleave', () => {
+      srtDz.classList.remove('border-indigo-500');
+    });
+    srtDz.addEventListener('drop', (e) => {
+      e.preventDefault();
+      srtDz.classList.remove('border-indigo-500');
+      if (e.dataTransfer.files.length > 0) {
+        handleSrtFileUpload({ target: { files: e.dataTransfer.files } });
+      }
+    });
+  }
+
+  const vidDz = document.getElementById('videoDropzone');
+  if (vidDz) {
+    vidDz.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      vidDz.classList.add('border-pink-500');
+    });
+    vidDz.addEventListener('dragleave', () => {
+      vidDz.classList.remove('border-pink-500');
+    });
+    vidDz.addEventListener('drop', (e) => {
+      e.preventDefault();
+      vidDz.classList.remove('border-pink-500');
+      if (e.dataTransfer.files.length > 0) {
+        handleSrtVideoUpload({ target: { files: e.dataTransfer.files } });
+      }
+    });
+  }
+}
+
+// Video Dubbing Player Logic
+function handleSrtVideoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const videoPlayer = document.getElementById('srtVideoPlayer');
+  const videoSection = document.getElementById('videoDubbingSection');
+  const videoStatusText = document.getElementById('videoStatusText');
+
+  const videoUrl = URL.createObjectURL(file);
+  videoPlayer.src = videoUrl;
+  videoSection.classList.remove('hidden');
+  if (videoStatusText) videoStatusText.textContent = `Attached: ${file.name}`;
+
+  showToast(`Video "${file.name}" loaded for synchronized dubbing!`, 'success');
+  setupVideoSyncListeners();
+}
+
+function setupVideoSyncListeners() {
+  const videoPlayer = document.getElementById('srtVideoPlayer');
+  if (!videoPlayer || videoPlayer.dataset.syncInit) return;
+  videoPlayer.dataset.syncInit = 'true';
+
+  const overlayText = document.getElementById('srtOverlayText');
+  const curTimeEl = document.getElementById('videoCurrentTime');
+  const totTimeEl = document.getElementById('videoTotalTime');
+
+  videoPlayer.addEventListener('loadedmetadata', () => {
+    if (totTimeEl) totTimeEl.textContent = formatTime(videoPlayer.duration);
   });
-  srtDropzone.addEventListener('dragleave', () => {
-    srtDropzone.classList.remove('border-indigo-500');
-  });
-  srtDropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    srtDropzone.classList.remove('border-indigo-500');
-    if (e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        parseAndLoadSrt(ev.target.result);
-        showToast(`Loaded "${file.name}"`, 'success');
-      };
-      reader.readAsText(file);
+
+  videoPlayer.addEventListener('timeupdate', () => {
+    const cur = videoPlayer.currentTime;
+    if (curTimeEl) curTimeEl.textContent = formatTime(cur);
+
+    // Find matching subtitle cue
+    const activeCue = state.srtCues.find(c => cur >= c.startSeconds && cur <= c.endSeconds);
+    if (activeCue) {
+      if (overlayText) {
+        overlayText.textContent = activeCue.text;
+        overlayText.classList.remove('hidden');
+      }
+    } else {
+      if (overlayText) {
+        overlayText.classList.add('hidden');
+      }
+    }
+
+    highlightActiveSrtCue(cur);
+
+    // If master audio engine has source and is playing with video, keep in sync
+    if (audioEngine.src && !audioEngine.paused) {
+      if (Math.abs(audioEngine.currentTime - cur) > 0.3) {
+        audioEngine.currentTime = cur;
+      }
     }
   });
+
+  videoPlayer.addEventListener('play', () => {
+    updateVideoPlayBtn(true);
+    if (audioEngine.src && audioEngine.src !== window.location.href && audioEngine.paused) {
+      audioEngine.currentTime = videoPlayer.currentTime;
+      audioEngine.play().catch(() => {});
+    }
+  });
+
+  videoPlayer.addEventListener('pause', () => {
+    updateVideoPlayBtn(false);
+    if (audioEngine.src && !audioEngine.paused) {
+      audioEngine.pause();
+    }
+  });
+
+  videoPlayer.addEventListener('seeking', () => {
+    if (audioEngine.src && audioEngine.src !== window.location.href) {
+      audioEngine.currentTime = videoPlayer.currentTime;
+    }
+  });
+}
+
+function toggleVideoPlayPause() {
+  const videoPlayer = document.getElementById('srtVideoPlayer');
+  if (!videoPlayer) return;
+
+  if (videoPlayer.paused) {
+    videoPlayer.play();
+  } else {
+    videoPlayer.pause();
+  }
+}
+
+function updateVideoPlayBtn(isPlaying) {
+  const icon = document.getElementById('videoPlayPauseIcon');
+  const text = document.getElementById('videoPlayPauseText');
+  if (!icon || !text) return;
+
+  if (isPlaying) {
+    icon.setAttribute('data-lucide', 'pause');
+    text.textContent = state.currentLang === 'km' ? 'ផ្អាកវីដេអូ' : 'Pause Sync';
+  } else {
+    icon.setAttribute('data-lucide', 'play');
+    text.textContent = state.currentLang === 'km' ? 'ចាក់វីដេអូ' : 'Play Sync';
+  }
+  lucide.createIcons();
+}
+
+function changeOriginalVideoVolume(val) {
+  const videoPlayer = document.getElementById('srtVideoPlayer');
+  if (videoPlayer) videoPlayer.volume = parseFloat(val);
+  const label = document.getElementById('videoOriginalVolText');
+  if (label) label.textContent = `${Math.round(val * 100)}%`;
+}
+
+function changeDubbedVoiceVolume(val) {
+  audioEngine.volume = parseFloat(val);
+  const label = document.getElementById('videoDubVolText');
+  if (label) label.textContent = `${Math.round(val * 100)}%`;
+}
+
+function toggleMuteVideoAudio(muted) {
+  const videoPlayer = document.getElementById('srtVideoPlayer');
+  if (videoPlayer) videoPlayer.muted = muted;
+  showToast(muted ? 'Muted original video audio' : 'Unmuted video audio', 'info');
+}
+
+function removeSrtVideo() {
+  const videoPlayer = document.getElementById('srtVideoPlayer');
+  const videoSection = document.getElementById('videoDubbingSection');
+  const videoStatusText = document.getElementById('videoStatusText');
+
+  if (videoPlayer) {
+    videoPlayer.pause();
+    videoPlayer.src = '';
+  }
+  if (videoSection) videoSection.classList.add('hidden');
+  if (videoStatusText) videoStatusText.textContent = 'For synchronized live video dubbing playback';
+  showToast('Removed attached video', 'info');
 }
 
 function srtTimeToSeconds(srtTime) {
@@ -1527,7 +2029,10 @@ function highlightActiveSrtCue(currentTimeSeconds) {
     const row = document.getElementById(`srt-row-${c.id}`);
     if (!row) return;
     if (currentTimeSeconds >= c.startSeconds && currentTimeSeconds <= c.endSeconds) {
-      row.classList.add('bg-indigo-950/40', 'border-indigo-500/40');
+      if (!row.classList.contains('bg-indigo-950/40')) {
+        row.classList.add('bg-indigo-950/40', 'border-indigo-500/40');
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     } else {
       row.classList.remove('bg-indigo-950/40', 'border-indigo-500/40');
     }

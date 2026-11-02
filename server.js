@@ -63,6 +63,7 @@ function loadVoices() {
           personalities: personalities,
           categories: categories,
           isPopular: [
+            'km-KH-PisethNeural', 'km-KH-SreymomNeural',
             'en-US-JennyNeural', 'en-US-GuyNeural', 'en-US-AriaNeural', 'en-US-ChristopherNeural', 'en-US-EricNeural',
             'en-GB-SoniaNeural', 'en-GB-RyanNeural', 'es-ES-AlvaroNeural', 'fr-FR-DeniseNeural', 'ja-JP-NanamiNeural',
             'zh-CN-XiaoxiaoNeural', 'vi-VN-HoaiMyNeural', 'de-DE-KatjaNeural', 'it-IT-IsabellaNeural', 'pt-BR-FranciscaNeural'

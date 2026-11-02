@@ -1,0 +1,25 @@
+{
+  "name": "KHS SRT.Ai - AI Text to Speech & Subtitle Studio",
+  "short_name": "KHS SRT.Ai",
+  "description": "Professional AI Neural Text-to-Speech, Subtitle Dubbing & Multi-Speaker Studio with 322 voices across 142 locales.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192' fill='%236366f1'><rect width='192' height='192' rx='36' fill='%23020617'/><path d='M96 36a24 24 0 0 0-24 24v56a24 24 0 0 0 48 0V60a24 24 0 0 0-24-24z' fill='%236366f1'/><path d='M152 100v16a56 56 0 0 1-112 0v-16' stroke='%236366f1' stroke-width='12' stroke-linecap='round' fill='none'/><line x1='96' y1='172' x2='96' y2='196' stroke='%236366f1' stroke-width='12' stroke-linecap='round'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%236366f1'><rect width='512' height='512' rx='96' fill='%23020617'/><path d='M256 96a64 64 0 0 0-64 64v148a64 64 0 0 0 128 0V160a64 64 0 0 0-64-64z' fill='%236366f1'/><path d='M400 270v40a144 144 0 0 1-288 0v-40' stroke='%236366f1' stroke-width='32' stroke-linecap='round' fill='none'/><line x1='256' y1='454' x2='256' y2='512' stroke='%236366f1' stroke-width='32' stroke-linecap='round'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

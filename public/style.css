@@ -1,5 +1,5 @@
 /* KHS SRT.Ai Theme & Custom Styles */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
   --bg-primary: #07090e;
@@ -26,7 +26,7 @@
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Kantumruy Pro', 'Khmer OS Siemreap', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-main);
   min-height: 100vh;
@@ -218,6 +218,41 @@ kbd {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   min-width: 58px;
+}
+
+/* Voice Dictation (STT) Recording Pulse */
+@keyframes micPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+.mic-recording {
+  animation: micPulse 1.2s infinite;
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #f87171 !important;
+}
+
+/* Video Subtitle Overlay Styling */
+.video-dub-container {
+  position: relative;
+  background-color: #000;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}
+.video-subtitle-overlay {
+  text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.8), -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  transition: all 0.15s ease-out;
+}
+
+/* Language Switcher Badge */
+.lang-badge {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.lang-badge:hover {
+  transform: translateY(-1px);
 }
 
 @media (max-width: 640px) {
